@@ -5,7 +5,7 @@ import webbrowser
 
 
 def load_data(tree):
-    print("load_data")
+    # print("load_data")
 
     data = swim_api.get_data()
     if not tree:
@@ -15,8 +15,8 @@ def load_data(tree):
     filter_time_list = set()
 
     for obj in data:
-        print(obj.location) 
-        tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), iid=obj.id, text=obj.rawDate)
+        # print(obj.location)
+        tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), iid=obj.iid, text=(obj.id, obj.rawDate))
         
         filter_location_list.add(obj.location)
         filter_time_list.add(obj.time)
@@ -36,7 +36,7 @@ def load_data(tree):
 def filter_click(item, type, data, time_box, location_box):
     time = time_box.get()
     location = location_box.get()
-    print(item, time, location)
+    # print(item, time, location)
     
     if type == "location":
         location = item
@@ -55,23 +55,25 @@ def filter_click(item, type, data, time_box, location_box):
 
     if location is None and time is None:
         for obj in data:
-            print(obj.location) 
-            tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), iid=obj.id, text=obj.rawDate)
+            # print(obj.location) 
+            tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), iid=obj.iid, text=(obj.id, obj.rawDate))
         return
     else:
         for obj in data:
             if (location == "" or location is None or obj.location == location) and (time == "" or time is None or obj.time == time):
+                tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), iid=obj.iid, text=(obj.id, obj.rawDate))
                 
-                tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), iid=obj.id, text=obj.rawDate)
 
 def expand(type):
     pass
 
 def item_click(event):
     selected_item = tree.focus()
-    print(tree.item(selected_item))
+    # print(tree.item(selected_item))
     if selected_item:
-        url = swim_api.generateButtonUrl(selected_item, tree.item(selected_item)["text"])
+        print(tree.item(selected_item)["text"])
+        item = tree.item(selected_item)["text"].split(" ")
+        url = swim_api.generateButtonUrl(item[0], item[1])
         webbrowser.open_new_tab(url)
 
 def create_tree(tree):
@@ -110,5 +112,8 @@ filter_frame.grid(row=1, column=0, sticky="ns")
 # treeStyle.configure("Treeview.Heading")
 tree = None #ttk.Treeview(window, column=(""), show='headings')
 tree = create_tree(tree)
+scrollBar = ttk.Scrollbar(window, orient="vertical", command=tree.yview)
+tree.config(yscrollcommand=scrollBar.set)
+scrollBar.grid(row=2, column=1, sticky="ns")
 
 window.mainloop()

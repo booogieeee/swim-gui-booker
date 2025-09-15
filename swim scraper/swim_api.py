@@ -1,37 +1,40 @@
 import try_post_request as post_rq
-import json
 import re
 
 
 def get_data():
-    raw = post_rq.post_data() 
-    data = json.loads(raw)
+    sections = post_rq.post_data() 
 
     #get useful locations
     locations = []
     counter = 0
+    print(len(sections[0]["classes"]))
+    print(len(sections[1]["classes"]))
+    print(len(sections[2]["classes"]))
+    for i in range(len(sections)):
+        print(len(sections[i]))
+        section = sections[i]
+        for data in section["classes"]:
+            if "Length Swim" in data["EventName"] and "Small" not in data["Location"]:
+                # print(data)
+                location = data["Location"]
+                time = data["EventTimeDescription"]
+                date = data["FormattedStartDate"]
+                rawDate = data["OccurrenceDate"]
+                id = data["EventId"]
+                iid = counter
+            
+                if "Full" in data["Spots"]:
+                    spots = "Full"
+                elif "More" in data["Spots"]:
+                    continue
+                else:
+                    spots = re.search(r'\d+', data["Spots"]).group() + " spot(s)"
 
-    for spot in enumerate(data["classes"]):
-        data = spot[1]
-        print(data)
-        location = data["Location"]
-        time = data["EventTimeDescription"]
-        date = data["FormattedStartDate"]
-        rawDate = data["OccurrenceDate"]
-        id = data["EventId"]
-
-        if "Length Swim" in data["EventName"] and "Small" not in location:
-            if "Full" in data["Spots"]:
-                spots = "Full"
-            elif "More" in data["Spots"]:
-                continue
-            else:
-                spots = re.search(r'\d+', data["Spots"]).group() + " spot(s)"
-
-            counter += 1
-            obj = Location(location, time, spots, date, rawDate, id)
-            locations.append(obj)
-    
+                counter += 1
+                obj = Location(location, time, spots, date, rawDate, id, iid)
+                locations.append(obj)
+        
     return locations
 
 
@@ -57,13 +60,14 @@ def generateButtonUrl(id, date):
 
 #class for each location
 class Location:
-    def __init__(self, location, time, spots, date, rawDate, id):
+    def __init__(self, location, time, spots, date, rawDate, id, iid):
         self.location = location
         self.time = time
         self.spots = spots
         self.date = date
         self.rawDate = rawDate
         self.id = id
+        self.iid = iid
 
 
 
