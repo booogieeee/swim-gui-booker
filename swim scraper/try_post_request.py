@@ -1,6 +1,6 @@
 import requests
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 url = "https://vaughan.perfectmind.com/25076/Clients/BookMe4BookingPagesV2/ClassesV2"
 date = None
@@ -43,8 +43,8 @@ payload = {
     },
     {
       "Name": "Date Range",
-      "Value": "2025-09-05T00:00:00.000Z",
-      "Value2": "2025-09-16T00:00:00.000Z",
+      "Value": f"{datetime.today()}T00:00:00.000Z",
+      "Value2": f"{datetime.today() + timedelta(days=5)}T00:00:00.000Z",
       "ValueKind": 6
     },
     {
@@ -58,15 +58,15 @@ payload = {
   "__RequestVerificationToken": "p85DWZVj4ienxZdB3YqxYyc4_Y-7auB9Zqmk3Je2zMNp2dGjRcs60n-2rXg11HZThB0qKYwko0k6RDgAD9V5khcIbvwlNU_-wowsR7G7_624n_Dc0"
 }
 
-def post_data():
-  data = {}
-  global date
-  for i in range(5):
-    if i == 0:
-      date = str(datetime.now().date())
-    result = requests.post(url=url, headers=headers, data=payload).text
-    result = json.loads(result)
-    data[i] = result
-    date = data[i]["nextKey"]
-    payload["after"] = date
-  return data
+def post_data(date):
+  # if i == 0:
+  #   date = str(datetime.now().date())
+  payload["after"] = date
+  result = requests.post(url=url, headers=headers, data=payload).text
+  result = json.loads(result)
+  nextDate = result["nextKey"]
+  
+  if not result:
+    print("ERROR: DATA NOT FOUND.")
+    return
+  return result, nextDate

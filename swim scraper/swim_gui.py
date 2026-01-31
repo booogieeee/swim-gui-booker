@@ -2,25 +2,31 @@ import tkinter as tk
 from tkinter import ttk
 import swim_api
 import webbrowser
+from datetime import datetime
 
-#comment from ian
-
-def load_data(tree):
+def load_data(tree, n):
     # print("load_data")
-
-    data = swim_api.get_data()
-    if not tree:
-        tree = create_tree(tree)
-    
+    nextDate = None
     filter_location_list = set()
     filter_time_list = set()
+    data = []
+    
+    if not tree:
+        tree = create_tree(tree)
 
-    for obj in data:
-        # print(obj.location)
-        tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), iid=obj.iid, text=(obj.id, obj.rawDate))
-        
-        filter_location_list.add(obj.location)
-        filter_time_list.add(obj.time)
+    for i in range(n):
+        date = nextDate or datetime.today()
+        section, nextDate = swim_api.get_data(date=date)
+        print(date, nextDate)
+        data = data + section
+
+        for obj in section:
+            #print(obj.location)
+            tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), text=(obj.id, obj.rawDate))
+            
+            filter_location_list.add(obj.location)
+            filter_time_list.add(obj.time)
+        tree.update() # not very performant but looks nicer :) - moved from updating every object to updating every section now, looks worse but runs better
 
     filter_location = ttk.Combobox(filter_frame, values=list(filter_location_list), state="readonly", width=50)
     filter_time = ttk.Combobox(filter_frame, values=list(filter_time_list), state="readonly", width=20)
@@ -57,12 +63,12 @@ def filter_click(item, type, data, time_box, location_box):
     if location is None and time is None:
         for obj in data:
             # print(obj.location) 
-            tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), iid=obj.iid, text=(obj.id, obj.rawDate))
+            tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), text=(obj.id, obj.rawDate))
         return
     else:
         for obj in data:
             if (location == "" or location is None or obj.location == location) and (time == "" or time is None or obj.time == time):
-                tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), iid=obj.iid, text=(obj.id, obj.rawDate))
+                tree.insert("", tk.END, values=(obj.date, obj.location, obj.time, obj.spots), text=(obj.id, obj.rawDate))
                 
 
 def expand(type):
@@ -102,7 +108,7 @@ window.columnconfigure(0, minsize=800, weight=1)
 frm_buttons = tk.Frame(window, relief=tk.SUNKEN, bd=2)
 filter_frame = tk.Frame(window, relief=tk.SUNKEN, bd=2)
 
-btn_load = tk.Button(frm_buttons, text="Load data", command= lambda: load_data(tree))
+btn_load = tk.Button(frm_buttons, text="Load data", command= lambda: load_data(tree, 5))
 
 btn_load.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
 
