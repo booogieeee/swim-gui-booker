@@ -45,13 +45,16 @@ def get_data(date):
 
 # buttonUrlExample = "https://vaughan.perfectmind.com/25076/Clients/BookMe4LandingPages/Class?widgetId=dff88c8a-0b78-4a94-9dde-250040385300&redirectedFromEmbededMode=False&classId=ab1f9a42-1e3a-b8ef-32b1-a52c9131869a&occurrenceDate=20250907"
 
-def generateButtonUrl(id, date):
+def generateButtonUrl(id, date, register=False):
     """ 
     generates button url from id and date,
     id example - ab1f9a42-1e3a-b8ef-32b1-a52c9131869a (Location.id),
     date format - 20250907 (Location.rawDate),
     returns link to register page"""
-    return f"https://vaughan.perfectmind.com/25076/Clients/BookMe4LandingPages/Class?widgetId=dff88c8a-0b78-4a94-9dde-250040385300&redirectedFromEmbededMode=False&classId={id}&occurrenceDate={date}"
+    if not register:
+        return f"https://vaughan.perfectmind.com/25076/Clients/BookMe4LandingPages/Class?redirectedFromEmbededMode=False&classId={id}&occurrenceDate={date}"
+    else:
+        return f"https://vaughan.perfectmind.com/25076/MyProfile/BookMe4EventParticipants?eventId={id}&occurrenceDate={date}&waitListMode=False"
 
 
 def findLocationFromCourseId(courseId, date):

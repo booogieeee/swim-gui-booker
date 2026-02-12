@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import swim_api
+import automation
 import webbrowser
 from datetime import datetime, timedelta
 import pystray #tray library
@@ -57,14 +58,17 @@ class SwimBookerApp: #dont wanna subclass tk.Tk cuz looks better for me like thi
     def create_controls(self):
         self.run_bg_var = tk.IntVar(name="run_bg")
         self.run_telegram_bot = tk.IntVar(name="run_telegram_bot")
+        self.one_click_var = tk.IntVar(name="one_click")
 
         self.load_btn = tk.Button(self.frm_buttons, text="Load data", command= lambda: self.load_data(5)) #self.load_data(n) where n is amount of sections to load
         self.run_tray_btn = ttk.Checkbutton(self.frm_buttons, text="minimize to tray", variable=self.run_bg_var)
         self.run_tg_btn = ttk.Checkbutton(self.frm_buttons, text="run telegram bot", variable=self.run_telegram_bot) #tg = telegram
+        self.one_click_btn = ttk.Checkbutton(self.frm_buttons, text="one click register", variable=self.one_click_var)
 
-        self.load_btn.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
-        self.run_tray_btn.grid(row=0, column=2, sticky="ew", padx=5)
-        self.run_tg_btn.grid(row=0, column=0, sticky="ew", padx=5)
+        self.load_btn.grid(row=0, column=2, sticky="ew", padx=5, pady=5)
+        self.run_tray_btn.grid(row=0, column=3, sticky="ew", padx=5)
+        self.run_tg_btn.grid(row=0, column=1, sticky="ew", padx=5)
+        self.one_click_btn.grid(row=0, column=0, sticky="ew", padx=5)
         
 
     # -- load data --
@@ -163,8 +167,16 @@ class SwimBookerApp: #dont wanna subclass tk.Tk cuz looks better for me like thi
         
         print(f"selected item: {self.tree.item(id)["text"]}")
         item = self.tree.item(id)["text"].split(" ")
-        url = swim_api.generateButtonUrl(item[0], item[1])
-        webbrowser.open_new_tab(url)
+        values = self.tree.item(id)["values"]
+        
+        #if automation box is checked:
+        if self.one_click_var.get() and values[3].split()[0].isdigit():
+            #automation thing
+            url = swim_api.generateButtonUrl(item[0], item[1], True)
+            automation.register(url=url)
+        else: #not one click
+            url = swim_api.generateButtonUrl(item[0], item[1])
+            webbrowser.open_new_tab(url)
     
     
     # --- window ----

@@ -1,6 +1,7 @@
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, Application
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, Application, Defaults
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 import pprint #pretty
 import re
 
@@ -69,6 +70,7 @@ async def set_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 print(f"OBJECT FOUND: {found.location} at {found.time} on {found.date}")
                 
                 break
+            #unnecessarily long print debug, too lazy to shorten lol not that important
             print(f"{str.lower(str.split(obj.location, " ")[0]) == location}, {str.lower(str.split(obj.time, " ")[0]) == time}, {datetime.strptime(re.sub(r'(\d+)(st|nd|rd|th)', r'\1', obj.date), "%a, %b %d, %Y").strftime("%Y-%m-%d") == date} - {obj.location}, {str.lower(str.split(obj.time, " ")[0] + str.split(obj.time, " ")[1])}, {obj.date} TO {location}, {time}, {date}")
         
         if not found:
@@ -126,11 +128,13 @@ def start_jobs(application: Application, reminders: dict):
         for d in days:
             d = d.lower()
             if d not in WEEKDAYS: #some error handling
-                print("invalid weekday: {d}")
+                print(f"invalid weekday: {d}")
                 continue
             weekdays.append(WEEKDAYS[d])
         weekdays = tuple(weekdays) #convert to tuple to use in job_queue
-        
+        if not weekdays:
+            continue
+
         #convert reminder time
         splitTime = str.split(time, " ")
         remind_time = datetime.strptime(splitTime[0] + splitTime[1], "%I:%M%p").time()
@@ -148,9 +152,11 @@ def start_jobs(application: Application, reminders: dict):
         )
 
         #use job_queue to remind on days specified
-        application.job_queue.run_daily(
+        naiveTime = "13:00:00" if remind_time.hour >= 13 else "05:00:00" #1pm if time is after 1pm, else do 5am (earlist possible is 6am i think)
+
+        a = application.job_queue.run_daily(
             send_reminder,
-            time=datetime.strptime("13:00:00", "%H:%M:%S").time() if remind_time.hour > 13 else datetime.strptime("05:00:00", "%H:%M:%S").time(), #1pm if time is after 1pm, else do 5am (earlist possible is 6am i think)
+            time=datetime.strptime(naiveTime, "%H:%M:%S").time(),
             days=weekdays,
             data={
                 "chat_id": chat_id,
@@ -159,18 +165,30 @@ def start_jobs(application: Application, reminders: dict):
             name=f"{courseId}_{weekdays}"
         )
 
+        #testing
+        # application.job_queue.run_once(
+        #     send_reminder,
+        #     when=10,
+        #     data={"chat_id": chat_id, "course_id": courseId}
+        # )
+
 
 def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+    my_timezone = ZoneInfo("America/New_York")
 
-    initialize(app)
-
+    defaults = Defaults(tzinfo=my_timezone)
+    app = ApplicationBuilder().token(TOKEN).defaults(defaults).build()
+    
     app.add_handlers(handlers={
         1: [CommandHandler("start", start), CommandHandler("help", help)],
         2: [CommandHandler("setreminder", set_reminder)]
     })
 
+    initialize(app)
+    
     app.run_polling()
+
+    
 
 if __name__ == "__main__":
     main()
