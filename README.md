@@ -18,7 +18,8 @@ No more scrambling for slots or clicking through endless forms — let the app h
 
 ## 📸 Screenshot
 
-_Add a screenshot of your GUI here once available_
+<img width="1020" height="897" alt="image" src="https://github.com/user-attachments/assets/27f7acf5-0703-42be-8a3b-4304a25c2410" />
+
 
 ---
 
