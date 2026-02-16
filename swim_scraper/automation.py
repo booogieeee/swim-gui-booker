@@ -3,7 +3,6 @@ from selenium.webdriver.common.by import By
 from datetime import datetime, timedelta
 import time
 import schedule
-import threading
 
 import swim_api
 
