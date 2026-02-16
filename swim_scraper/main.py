@@ -3,6 +3,9 @@ from pathlib import Path
 #subprocess for bot to not crash gui
 import subprocess
 import sys
+import threading
+
+import automation
 
 app = SwimBookerApp()
 
@@ -43,5 +46,7 @@ def set_telegram_bot(*_): # *_ basically just ignores multiple variables when un
 #attach traces (listeners)
 app.run_telegram_bot.trace_add("write", set_telegram_bot)
 app.window.protocol("WM_DELETE_WINDOW", lambda: app.close(close_callback=stop_bot))
+
+threading.Thread(target=automation.start, daemon=True).start()
 
 app.run()

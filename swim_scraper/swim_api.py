@@ -18,7 +18,7 @@ def get_data(date):
             date = data["FormattedStartDate"]
             rawDate = data["OccurrenceDate"]
             id = data["EventId"]
-            courseId = data["CourseId"]
+            courseId = data["CourseIdTrimmed"]
         
             if "Full" in data["Spots"]:
                 spots = "Full"
@@ -50,15 +50,15 @@ def generateButtonUrl(id, date, register=False):
     generates button url from id and date,
     id example - ab1f9a42-1e3a-b8ef-32b1-a52c9131869a (Location.id),
     date format - 20250907 (Location.rawDate),
-    returns link to register page"""
+    returns link to register page
+    """
     if not register:
         return f"https://vaughan.perfectmind.com/25076/Clients/BookMe4LandingPages/Class?redirectedFromEmbededMode=False&classId={id}&occurrenceDate={date}"
     else:
         return f"https://vaughan.perfectmind.com/25076/MyProfile/BookMe4EventParticipants?eventId={id}&occurrenceDate={date}&waitListMode=False"
 
 
-def findLocationFromCourseId(courseId, date):
-    maxAttempts = 3
+def findLocationFromCourseId(courseId, date, maxAttempts=3):
     while maxAttempts > 0:
         locations, date = get_data(date)
         for location in locations:

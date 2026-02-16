@@ -7,7 +7,7 @@ import re
 
 #my own stuff
 import swim_api
-from storage import saving
+from data import saving
 
 #.env stuff for bot token security
 import os
@@ -107,7 +107,7 @@ def initialize(application: Application):
 
 def start_jobs(application: Application, reminders: dict):
     # -- REMIND --
-    WEEKDAYS = { #convert weekdays to numbers
+    WEEKDAYS = { #convert weekdays to numbers (IN TELEGRAM API SUN = 0, SAT = 6)
         "sun": 0,
         "mon": 1,
         "tue": 2,
