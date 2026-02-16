@@ -101,13 +101,14 @@ async def send_reminder(context: ContextTypes.DEFAULT_TYPE):
 async def delete_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reminders = context.bot_data["reminders"]
     if reminders != {}:
-        if context.args[0]:
+        if context.args:
             index = context.args[0]
 
             for i, id in enumerate(reminders):
                 if str(i) == index:
                     reminder = reminders[id]
                     location, time, days = reminder["location"], reminder["time"], reminder["days"]
+                    saving.delete_reminders(id)
                     del reminders[id]
                     await update.message.reply_text(f"reminder removed for: {location} at {time} on {days}")
                     return

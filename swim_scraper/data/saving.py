@@ -27,4 +27,7 @@ def save_reminders(reminders):
 
 def delete_reminders(id):
     with open(FILE, "w") as f:
-        del f[id]
+        data = json.load(f)
+        if id in data:
+            del data[id]
+            json.dump(data, f, indent=2)
