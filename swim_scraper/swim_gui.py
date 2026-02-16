@@ -242,7 +242,7 @@ class SwimBookerApp: #dont wanna subclass tk.Tk cuz looks better for me like thi
     def close(self, close_callback=None):
         if self.run_bg_var.get():
             self.window.withdraw()
-            image = Image.open("app.ico")
+            image = Image.open("swim_scraper/assets/app.ico")
             menu = (pystray.MenuItem("show", self.show_window),
                     pystray.MenuItem("quit", self.quit_window))
             icon = pystray.Icon("icon", image, "swim booker", menu)

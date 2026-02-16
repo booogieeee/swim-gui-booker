@@ -27,8 +27,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("this is the help command!\n\n" \
     "GENERAL: \n/start\n/help\n\n" \
-    "REMINDER: \n/setreminder [first word of location] [start time]<am|pm> ([start month]-[start day] | today) [days to remind | all]\nEXAMPLE: /setreminder garnet 06:30am 03-02 mon wed fri")
-
+    "REMINDER: \n/setreminder [first word of location] [start time]<am|pm> ([start month]-[start day] | today) [days to remind]\nEXAMPLE: /setreminder garnet 06:30am 03-02 mon wed fri\n/delreminder [index]\n/reminders")
 
 
 async def set_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -79,7 +78,7 @@ async def set_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             start_jobs(context.application, reminders)
             saving.save_reminders(reminders)
-        await update.message.reply_text(f"all reminders: \n{"\n".join(f"{i}: {pprint.pformat(reminder)}" for i, reminder in enumerate(reminders.values()))}")
+            await update.message.reply_text(f"sucessfully set reminder!")
 
 
 #function to send message without user input (reminder)
@@ -96,7 +95,32 @@ async def send_reminder(context: ContextTypes.DEFAULT_TYPE):
             text=f"Did you book {found.location} at {found.time} yet? if not, heres the link: {swim_api.generateButtonUrl(found.id, found.rawDate)}" #put link to event register page, as well as yes/no to automatically book
         )
     else:
-        print("no reminders for a while!")
+        print(f"reminder not found! courseid: {course_id}")
+
+
+async def delete_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    reminders = context.bot_data["reminders"]
+    if reminders != {}:
+        if context.args[0]:
+            index = context.args[0]
+
+            for i, id in enumerate(reminders):
+                if str(i) == index:
+                    reminder = reminders[id]
+                    location, time, days = reminder["location"], reminder["time"], reminder["days"]
+                    del reminders[id]
+                    await update.message.reply_text(f"reminder removed for: {location} at {time} on {days}")
+                    return
+            await update.message.reply_text(f"reminder not found! make sure index is correct")
+        else:
+            await update.message.reply_text(f"you need to say what you want to remove! (number)")
+    else:
+        await update.message.reply_text(f"you have no reminders!")
+
+
+async def display_reminders(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    reminders = context.bot_data["reminders"]
+    await update.message.reply_text(f"all reminders: \n{"\n".join(f"{i}: {pprint.pformat(reminder)}" for i, reminder in enumerate(reminders.values()))}")
 
 
 def initialize(application: Application):
@@ -166,11 +190,11 @@ def start_jobs(application: Application, reminders: dict):
         )
 
         #testing
-        # application.job_queue.run_once(
-        #     send_reminder,
-        #     when=10,
-        #     data={"chat_id": chat_id, "course_id": courseId}
-        # )
+        application.job_queue.run_once(
+            send_reminder,
+            when=5,
+            data={"chat_id": chat_id, "course_id": courseId}
+        )
 
 
 def main():
@@ -181,7 +205,7 @@ def main():
     
     app.add_handlers(handlers={
         1: [CommandHandler("start", start), CommandHandler("help", help)],
-        2: [CommandHandler("setreminder", set_reminder)]
+        2: [CommandHandler("setreminder", set_reminder), CommandHandler("delreminder", delete_reminder), CommandHandler("reminders", display_reminders)]
     })
 
     initialize(app)
