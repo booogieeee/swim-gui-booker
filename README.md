@@ -61,4 +61,3 @@ python main.py
 ## 📌 Notes
 
 - The app must stay running for the automatic booking/telegram bot to work
-- Don't be dumb and commit .env (as if anyone would ever commit)
