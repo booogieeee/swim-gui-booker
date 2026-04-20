@@ -61,3 +61,4 @@ python main.py
 ## 📌 Notes
 
 - The app must stay running for the automatic booking/telegram bot to work
+add this to file
